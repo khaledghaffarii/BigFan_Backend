@@ -1,0 +1,4 @@
+[2022-06-16 11:56:30.141] [exthost] [info] Extension host with pid 12835 started
+[2022-06-16 11:56:30.141] [exthost] [info] Skipping acquiring lock for /home/ghaffari/Documents/project/BigFan/backend/~/root/User/workspaceStorage/756958d73ea15e0e9530f0d54e6bed2b.
+[2022-06-16 11:57:21.543] [exthost] [info] Extension host terminating: renderer closed the socket
+[2022-06-16 11:57:21.544] [exthost] [info] Extension host with pid 12835 exiting with code 0

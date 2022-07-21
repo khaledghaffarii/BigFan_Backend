@@ -1,0 +1,3 @@
+[2022-06-16 12:28:45.273] [exthost] [info] Extension host with pid 17489 started
+[2022-06-16 12:28:47.889] [exthost] [info] Extension host terminating: renderer closed the socket
+[2022-06-16 12:28:47.890] [exthost] [info] Extension host with pid 17489 exiting with code 0
