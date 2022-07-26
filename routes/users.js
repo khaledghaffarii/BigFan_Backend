@@ -208,7 +208,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/register", uploadOptions.single("image"), async (req, res) => {
+router.post("/register" ,async (req, res) => {
   //method for create a rondom string character
   const character =
     "123456789abcdefghijklmnopqrstuvwxzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -217,11 +217,12 @@ router.post("/register", uploadOptions.single("image"), async (req, res) => {
     activationCode += character[Math.floor(Math.random() * character.length)];
   }
 
-  const file = req.file;
-  if (!file) return res.status(400).send("No image in the request");
+  // const file = req.file;
+  // if (!file) return res.status(400).send("No image in the request");
 
-  const fileName = file.filename;
-  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+  // const fileName = file.filename;
+  // const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+  
 
   User.findOne({ email: req.body.email }).then(async (user) => {
     if (user) {
@@ -232,7 +233,7 @@ router.post("/register", uploadOptions.single("image"), async (req, res) => {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
-        image: `${fileName}`,
+        image: req.body.image,
         passwordHash: bcrypt.hashSync(
           JSON.stringify(req.body.passwordHash),
           10
@@ -245,7 +246,7 @@ router.post("/register", uploadOptions.single("image"), async (req, res) => {
         country: req.body.country,
         activationCode: activationCode,
       });
-      console.log(user.image);
+      // console.log(user.image);
       if (!user) return res.status(400).send("the user cannot be created!");
       if (!emailValidator.validate(req.body.email)) {
         return res.status(400).send("The Email is invalid ");

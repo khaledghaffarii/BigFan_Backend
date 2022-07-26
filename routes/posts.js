@@ -31,19 +31,19 @@ const uploadOptions = multer({ storage: storage });
 
 router.get(`/`, async (req, res) => {
   const postList = await Post.find()
-    .populate("user", "firstName lastName image ")
-    .populate("comments", "on_comment datecommented")
-    .populate("like", "user")
-    .sort({ datePosted: -1 });
+    // .populate("user", "firstName lastName image ")
+    // .populate("comments", "on_comment datecommented")
+    // .populate("like", "user")
+    // .sort({ datePosted: -1 });
 
   if (!postList) {
     res.status(500).json({ success: false });
   }
   const commentList = await Comment.find().populate("post");
-  console.log(
-    "🚀 ~ file: posts.js ~ line 41 ~ router.get ~ commentList",
-    commentList
-  );
+  // console.log(
+  //   "🚀 ~ file: posts.js ~ line 41 ~ router.get ~ commentList",
+  //   commentList
+  // );
  
   res.send(postList);
 });
