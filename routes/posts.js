@@ -31,10 +31,10 @@ const uploadOptions = multer({ storage: storage });
 
 router.get(`/`, async (req, res) => {
   const postList = await Post.find()
-    // .populate("user", "firstName lastName image ")
-    // .populate("comments", "on_comment datecommented")
-    // .populate("like", "user")
-    // .sort({ datePosted: -1 });
+    .populate("user", "firstName lastName image ")
+    .populate("comments", "on_comment datecommented")
+    .populate("like", "user")
+    .sort({ datePosted: -1 });
 
   if (!postList) {
     res.status(500).json({ success: false });
@@ -44,31 +44,63 @@ router.get(`/`, async (req, res) => {
   //   "🚀 ~ file: posts.js ~ line 41 ~ router.get ~ commentList",
   //   commentList
   // );
- 
+
+  res.send(postList);
+});
+router.get(`/home`, async (req, res) => {
+  const postList = await Post.find({visibility: true})
+    .populate("user", "firstName lastName image ")
+    .populate("comments", "on_comment datecommented")
+    .populate("like", "user")
+    .sort({ datePosted: -1 });
+
+  if (!postList) {
+    res.status(500).json({ success: false });
+  }
+  const commentList = await Comment.find().populate("post");
+  // console.log(
+  //   "🚀 ~ file: posts.js ~ line 41 ~ router.get ~ commentList",
+  //   commentList
+  // );
+
   res.send(postList);
 });
 
+// //get post wher id post
+// router.get("/:postId", async (req, res) => {
+//   const post = await Post.findById({ id: req.params.id })
+//     .populate("comments", "on_comment datecommented ")
+//     .populate("user", "firstName lastName image ")
+//     .sort({ datePosted: -1 });
+
+//   if (!post) {
+//     res
+//       .status(500)
+//       .json({ message: "The post with the given ID was not found." });
+//   }
+//   res.status(200).send(post);
+// });
+
+//get post wher user
 router.get("/:id", async (req, res) => {
-  const post = await Post.findById(req.params.id)
-    .populate("comments", "on_comment datecommented ")
-    .populate("user", "firstName lastName image ")
-    .sort({ datePosted: -1 });
-
-  if (!post) {
-    res
-      .status(500)
-      .json({ message: "The post with the given ID was not found." });
+  try {
+    await Post.find({ user: req.params.id })
+      .sort({ datePosted: -1 })
+      .then((post) => {
+        res.status(200).json(post);
+      });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
   }
-  res.status(200).send(post);
 });
-
 router.post("/", async (req, res) => {
   let post = new Post({
     image: req.body.image,
     video: req.body.video,
     visibility: req.body.visibility,
+    text: req.body.text,
     user: req.body.user,
-   // address_location: req.body.address_location,
+    // address_location: req.body.address_location,
   });
   post = await post.save();
   if (!post) return res.status(400).send("the user cannot be created!");
@@ -126,7 +158,7 @@ router.delete("/:id", (req, res) => {
       return res.status(500).json({ success: false, error: err });
     });
 });
-//delete all post 
+//delete all post
 router.delete("/", (req, res) => {
   Post.remove()
     .then((post) => {

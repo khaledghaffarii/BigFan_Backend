@@ -100,7 +100,7 @@ router.post("/", uploadOptions.single("image"), async (req, res) => {
   });
 });
 
-router.put("/:id", uploadOptions.single("image"), async (req, res) => {
+router.put("/:id",async (req, res) => {
   const userExist = await User.findById(req.params.id);
   let newPassword;
 
@@ -110,11 +110,7 @@ router.put("/:id", uploadOptions.single("image"), async (req, res) => {
     newPassword = userExist.passwordHash;
   }
 
-  const file = req.file;
-  if (!file) return res.status(400).send("No image in the request");
-
-  const fileName = file.filename;
-  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+  
 
   const user = await User.findByIdAndUpdate(
     req.params.id,
@@ -124,7 +120,7 @@ router.put("/:id", uploadOptions.single("image"), async (req, res) => {
       email: req.body.email,
       passwordHash: newPassword,
       phone: req.body.phone,
-      image: `${basePath}${fileName}`,
+      image: req.body.image,
       phone: req.body.phone,
       isAdmin: req.body.isAdmin,
       country: req.body.country,
@@ -179,10 +175,10 @@ router.post("/login", async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   const secret = process.env.secret;
   if (!emailValidator.validate(req.body.email)) {
-    return res.status(400).send("The Email is invalid ");
+    return res.status(400).send("The_Email_is_invalid ");
   }
   if (!user) {
-    return res.status(400).send("The user not found");
+    return res.status(400).send("The_user_not_found");
   }
   if (
     user &&
@@ -204,7 +200,7 @@ router.post("/login", async (req, res) => {
       message: "veuillez verifier votre boite email pour l'activation",
     });
   } else {
-    res.status(400).send("password is wrong!");
+    res.status(400).send("password_is_wrong!");
   }
 });
 
