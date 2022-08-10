@@ -5,7 +5,7 @@ const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
     user: process.env.USER_EMAIL,
-    pass:process.env.USER_PASSWORD,
+    pass: process.env.USER_PASSWORD,
   },
 });
 
@@ -13,7 +13,7 @@ module.exports.sendConfirmationEmail = (email, activationCode) => {
   transporter
     .sendMail({
       from: "mahmoud.hdidi1@esprit.tn", // Change to your verified sender
-     
+
       to: email, // Change to your recipient
       subject: "Confirmer Votre Compte",
       text: "and easy to do anywhere, even with Node.js",

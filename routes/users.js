@@ -3,6 +3,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
+const { OAuth2Client } = require("google-auth-library");
 const router = express.Router();
 const FILE_TYPE_MAP = {
   "image/png": "png",
@@ -100,7 +101,7 @@ router.post("/", uploadOptions.single("image"), async (req, res) => {
   });
 });
 
-router.put("/:id",async (req, res) => {
+router.put("/:id", async (req, res) => {
   const userExist = await User.findById(req.params.id);
   let newPassword;
 
@@ -109,8 +110,6 @@ router.put("/:id",async (req, res) => {
   } else {
     newPassword = userExist.passwordHash;
   }
-
-  
 
   const user = await User.findByIdAndUpdate(
     req.params.id,
@@ -121,7 +120,6 @@ router.put("/:id",async (req, res) => {
       passwordHash: newPassword,
       phone: req.body.phone,
       image: req.body.image,
-      phone: req.body.phone,
       isAdmin: req.body.isAdmin,
       country: req.body.country,
     },
@@ -204,7 +202,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/register" ,async (req, res) => {
+router.post("/register", async (req, res) => {
   //method for create a rondom string character
   const character =
     "123456789abcdefghijklmnopqrstuvwxzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -218,7 +216,6 @@ router.post("/register" ,async (req, res) => {
 
   // const fileName = file.filename;
   // const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
-  
 
   User.findOne({ email: req.body.email }).then(async (user) => {
     if (user) {
@@ -282,6 +279,129 @@ router.post("/register" ,async (req, res) => {
   });
 });
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT);
+router.post("/googlelogin", async (req, res) => {
+  const user = await User.find();
+  const secret = process.env.secret;
+  const token = jwt.sign(
+    {
+      userId: user.id,
+      isAdmin: user.isAdmin,
+    },
+    secret,
+    { expiresIn: "1d" }
+  );
+ // const { idToken } = token
+  client
+    .verifyIdToken({ token, audience: process.env.GOOGLE_CLIENT })
+    .then((response) => {
+      console.log("GOOGLE LOGIN RESPONSE", response);
+      const { email_verified, name, email, picture } = response.payload;
+      //Check if email is verified
+      if (email_verified) {
+        User.findOne({ email }).exec((err, user) => {
+          w;
+          // find if this email already exists
+          // if exists
+          if (user) {
+            console.log("old user : " + user);
+            const token = jwt.sign(
+              { _id: user._id },process.env.JWT_SECRET,
+              {
+                expiresIn: "7d", // valid token for 7 days
+              }
+            );
+            //add infos from google to the user model
+            user.firstName = name;
+            user.lastName = name;
+            user.image = picture;
+            user.save().then((data) => {
+              data === user; // true
+              console.log("data update after : " + data);
+            });
+            console.log("new user : " + user);
+            const {
+              _id,
+              firstName,
+              lastName,
+              email,
+              isAdmin,
+              image,
+              country,
+              Phone,
+            } = user;
+            //send response to client side (react) : token + user info
+            return res.json({
+              token,
+              user: {
+                _id,
+                firstName,
+                lastName,
+                email,
+                isAdmin,
+                image,
+                country,
+                Phone,
+              },
+            });
+          } else {
+            //If user not exists we will save in database and generate password for it
+            let passwordHash = email + process.env.JWT_SECRET;
+            //Create user object with this email
+            user = new User({
+              firstName: name,
+              lastName: name,
+              email,
+              passwordHash,
+              image: picture,
+            });
+            user.save((err, data) => {
+              if (err) {
+                console.log("ERROR GOOGLE LOGIN ON USER SAVE", err);
+                return res.status(400).json({
+                  error: "User signup failed with google",
+                });
+              }
+              //If no error generate a token
+              const token = jwt.sign(
+                { _id: data._id },
+                process.env.JWT_SECRET,
+                { expiresIn: "7d" }
+              );
+              const {
+                _id,
+                firstName,
+                lastName,
+                email,
+                isAdmin,
+                image,
+                country,
+                Phone,
+              } = data;
+              return res.json({
+                token,
+                user: {
+                  _id,
+                  firstName,
+                  lastName,
+                  email,
+                  isAdmin,
+                  image,
+                  country,
+                  Phone,
+                },
+              });
+            });
+          }
+        });
+      } else {
+        return res.status(400).json({
+          //If error
+          error: "Google login failed. Try again",
+        });
+      }
+    });
+});
 router.get(`/get/count`, async (req, res) => {
   const userCount = await User.countDocuments((count) => count);
 

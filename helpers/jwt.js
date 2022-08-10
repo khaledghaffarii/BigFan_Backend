@@ -30,6 +30,7 @@ function authJwt() {
       `${api}/posts`,
       `${api}/comments`,
       `${api}/likes`,
+      `${api}/users/googlelogin`,
     ],
   });
 }
