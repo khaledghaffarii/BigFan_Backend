@@ -49,7 +49,7 @@ router.get(`/`, async (req, res) => {
 });
 router.get(`/home`, async (req, res) => {
   const postList = await Post.find({visibility: true})
-    .populate("user", "firstName lastName image ")
+    .populate("user", "firstName lastName image phone email country")
     .populate("comments", "on_comment datecommented")
     .populate("like", "user")
     .sort({ datePosted: -1 });
